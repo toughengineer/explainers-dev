@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sample rate and aliasing</title>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=2,shrink-to-fit=no">
+  <link rel="stylesheet" href="range-input.css">
+  <style type="text/css">
+    a[target="_blank"]:not(.no-external-link-icon) {
+      white-space: nowrap;
+    }
+
+      a[target="_blank"]:not(.no-external-link-icon)::after {
+        content: "";
+        width: 1em;
+        height: 1em;
+        background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHBhdGggZD0iTTkgMnYxaDMuM0w2IDkuM2wuNy43TDEzIDMuN1Y3aDFWMnpNNCA0YTIgMiAwIDAwLTIgMnY2YzAgMS4xLjkgMiAyIDJoNmEyIDIgMCAwMDItMlY3bC0xIDF2NGMwIC42LS40IDEtMSAxSDRhMSAxIDAgMDEtMS0xVjZjMC0uNi40LTEgMS0xaDRsMS0xeiIvPjwvc3ZnPg==) no-repeat;
+        background-size: contain;
+        margin: 0 0.05em 0 0.1em;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+    html {
+      position: relative;
+    }
+
+    body {
+      font-family: Helvetica, Arial, Sans-Serif;
+      font-size: 20px;
+      color: #010101;
+      height: auto;
+      margin: 0;
+      padding: 0;
+    }
+
+    button, select, input {
+      font-size: 20px;
+      color: #010101;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    body {
+      background-color: #eee;
+    }
+
+    .content {
+      max-width: 1100px;
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+
+    .contentBackground {
+      height: 100%;
+      min-height: 100vh;
+      background-color: white;
+      box-shadow: 0 0 25px #ccc;
+    }
+
+    .centered {
+      margin: 0 auto 0 auto;
+      display: block;
+    }
+
+    .note {
+      font-size: 0.9em;
+      color: #333;
+    }
+
+    .controlsBlock {
+      margin: 0.2em 0.5em 0.2em 0;
+      padding: 0.3em;
+      border-radius: 3px;
+      box-shadow: 0 0 0.3em #ddd;
+    }
+
+    .blockShadow {
+      box-shadow: 0 0 0.5em #ccc;
+    }
+
+    .hideOverflow {
+      display: block;
+      overflow: hidden;
+      position: relative;
+    }
+
+      .hideOverflow::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        width: 1em;
+        height: 100%;
+        background: linear-gradient(to right, transparent, white);
+        pointer-events: none;
+      }
+
+    .spectrumColorGradient {
+      background: linear-gradient(0deg, rgb(0,0,0) 0%, rgb(0,0,255) 25%, rgb(255,0,255) 50%, rgb(255,0,0) 75%, rgb(255,255,0) 99%, rgb(255,255,255) 100%);
+    }
+
+    [style*="--aspect-ratio"] {
+      position: relative;
+    }
+
+      [style*="--aspect-ratio"]::before {
+        display: block;
+        content: "";
+        padding-top: calc(100% / (var(--aspect-ratio)));
+      }
+
+      [style*="--aspect-ratio"] > :first-child {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+    .stickyWhiteBackground {
+      background: #ffffff;
+      background: #ffffffbb;
+    }
+
+    .overhangLeft {
+      margin-left: -0.5em;
+      padding-left: 0.5em;
+    }
+
+    .overhangRight {
+      margin-right: -0.5em;
+      padding-right: 0.5em;
+    }
+
+    @media screen and (max-height: 800px) and (orientation: landscape) {
+      .stickToTop {
+        position: sticky;
+        top: 0;
+      }
+
+      .stickToBottom {
+        position: sticky;
+        bottom: 0;
+      }
+
+      .hideOverflow::after {
+        background: none;
+      }
+    }
+
+    .widgetSeparator {
+      background: #ccc;
+      height: 3px;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    input[type="radio"].icon {
+      display: none;
+    }
+
+    label > input[type="radio"].icon + *::before {
+      content: "";
+      display: inline-block;
+      margin: 0.1em;
+      width: 1em;
+      height: 1em;
+      box-shadow: 0 0 0.3em #aaa;
+      vertical-align: middle;
+    }
+
+    label > input[type="radio"].icon:checked + *::before {
+      outline: 2px solid #0082f2;
+      outline-offset: 2px;
+    }
+
+    label > input[type="radio"].icon.color + *::before {
+      background: url(spectrogram-color.png) no-repeat;
+      background-size: contain;
+    }
+
+    label > input[type="radio"].icon.white + *::before {
+      background: url(spectrogram-white.png) no-repeat;
+      background-size: contain;
+    }
+
+    label > input[type="radio"].icon.black + *::before {
+      background: url(spectrogram-black.png) no-repeat;
+      background-size: contain;
+    }
+
+    .graphLabel {
+      padding: 3px;
+      font-size: 13px;
+      color: white;
+      text-shadow: 0 0 3px black, 0 0 2px black, 0 0 1px black;
+    }
+
+    .blackOnWhite .graphLabel {
+      color: black;
+      text-shadow: 0 0 3px white, 0 0 2px white, 0 0 1px white;
+    }
+
+    .graphLabel.note {
+      color: gray;
+    }
+
+    .credits {
+      opacity: 0.5;
+    }
+
+      .credits:hover {
+        opacity: 1;
+      }
+
+    .twitterIcon {
+      width: 1em;
+      height: 1em;
+      background: url(data:image/svg+xml;base64,PHN2ZyBjbGFzcz0idTAxLWR0Yy1yZWFjdF9fdHdpdHRlci1sb2dvLWljb24gdHd0ci1pY29uIiBoZWlnaHQ9IjI0IiB3aWR0aD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIzLjYgNWMtLjguMy0xLjcuNi0yLjYuNyAxLS42IDEuNy0xLjUgMi0yLjYtLjkuNS0xLjkgMS0zIDEuMWE0LjcgNC43IDAgMDAtNy45IDQuM2MtMy45LS4yLTcuMy0yLTkuNi00LjlBNC43IDQuNyAwIDAwNCA5LjhjLS44IDAtMS41LS4yLTIuMi0uNnYuMWMwIDIuMyAxLjcgNC4xIDMuOCA0LjZhNC43IDQuNyAwIDAxLTIuMSAwIDQuNyA0LjcgMCAwMDQuMyAzLjMgOS4zIDkuMyAwIDAxLTYuOSAyYzIuMSAxLjIgNC41IDIgNy4yIDJBMTMuMiAxMy4yIDAgMDAyMS4zIDcuNGMxLS43IDEuNy0xLjUgMi4zLTIuNXoiIGZpbGw9IiMxRDlCRjAiLz48L3N2Zz4=) no-repeat;
+      background-size: contain;
+      display: inline-block;
+      vertical-align: middle;
+      opacity: 0.5;
+    }
+
+      .twitterIcon:hover {
+        opacity: 1;
+      }
+  </style>
+</head>
+<body>
+  <div style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; min-height: 100vh; z-index: -1;">
+    <div class="content contentBackground centered"></div>
+  </div>
+  <div class="content centered">
+    <div style="text-align: center; font-size: 3em;">
+      &#x1F6A7;This page is under construction&#x1F6A7;
+    </div>
+    <h1>Sample rate and aliasing</h1>
+    <p>
+      Hello, friend!
+    </p>
+    <p>
+      This time I want to tell you about sampling rate (or, simply, <em>sample rate</em>) in digital signal processing, and about a perculiar effect called <em>aliasing</em>.
+    </p>
+    <p>
+      TODO: describe how sampling works
+    </p>
+    <div>
+      <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
+        <canvas id="sampling" style="width: 100%; height: 100%;" width="1000" height="500"></canvas>
+      </div>
+      <div style="height: 0.5em; margin-bottom: -75vh;"></div>
+      <div class="stickToBottom stickyWhiteBackground overhangLeft overhangRight" style="margin-top: 75vh;">
+        <input id="samplingParameter" type="range" class="styled-slider" style="width: 100%;" step="0.1" />
+        <div class="note" style="text-align:center;">Move the slider to change waveform.</div>
+      </div>
+    </div>
+    <p>
+      Once given the samples, what to use to connect the points? A step? Straight line? A Pokemon shape?
+    </p>
+    <p>
+      TODO: describe how a step can be represented by infinite number of sines
+    </p>
+    <div>
+      <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
+        <canvas id="fourierSeries" style="width: 100%; height: 100%;" width="1000" height="500"></canvas>
+        <div style="position: absolute; bottom: 0; right: 0; max-width: 100%;">
+          Number of terms:
+          <div id="fourierSeriesCountDisplay" style="display: inline-block; width: 5ex;"></div>
+        </div>
+      </div>
+      <div style="height: 0.5em; margin-bottom: -75vh;"></div>
+      <div class="stickToBottom stickyWhiteBackground overhangLeft overhangRight" style="margin-top: 75vh;">
+        <input id="fourierSeriesComponentsCount"
+               type="range"
+               class="styled-slider"
+               style="width: 100%;"
+               min="1"
+               max="100"
+               value="1" />
+        <div class="note" style="text-align:center;">Move the slider to change the number of series components.</div>
+      </div>
+    </div>
+    <p>
+      For 10000 components it gets really close...
+    </p>
+    <p>
+      TODO: describe how band limited signal can be perfectly reconstructed from samples using lowpass filter
+    </p>
+    <label class="controlsBlock" style="display: inline-block;">
+      Shape
+      <select id="waveShape">
+        <option value="sine" selected>sine</option>
+        <option value="square">square</option>
+        <option value="triangle">triangle</option>
+        <option value="saw">saw</option>
+        <option value="saw2">saw 2</option>
+        <option value="noise">noise</option>
+      </select>
+    </label>
+    <button id="randomizeNoiseButton" class="hidden">randomize</button>
+    <div style="margin-top: 0.5em;">
+      <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
+        <canvas id="reconstruction" style="width: 100%; height: 100%;" width="1000" height="500"></canvas>
+      </div>
+      <div style="height: 0.5em; margin-bottom: -75vh;"></div>
+      <div class="stickToBottom stickyWhiteBackground overhangLeft overhangRight" style="margin-top: 75vh;">
+        <input id="waveFrequency" type="range" class="styled-slider" style="width: 100%;" min="1" max="40" value="1" step="0.1" />
+        <div class="note" style="text-align:center;">Move the slider to change frequency of the wave.</div>
+      </div>
+    </div>
+    <p>
+      TODO: describe how non-linear distortion may create harmonics with higher frequencies
+    </p>
+    <div id="colorScheme" class="controlsBlock" style="display: inline-block; float: right;">
+      Color scheme:
+      <label title="Color coded"><input class="color icon" type="radio" name="colorScheme" checked /><span></span></label>
+      <label title="White on black"><input class="white icon" type="radio" name="colorScheme" /><span></span></label>
+      <label title="Black on white"><input class="black icon" type="radio" name="colorScheme" /><span></span></label>
+    </div>
+    <div style="display: inline-block;">
+      <label class="controlsBlock" style="display: inline-block;">
+        Sample rate
+        <select id="sampleRate">
+          <option value="8000">8000 Hz</option>
+          <option value="11025">11025 Hz</option>
+          <option value="16000">16000 Hz</option>
+          <option value="22050">22050 Hz</option>
+          <option value="24000">24 kHz</option>
+          <option value="32000">32 kHz</option>
+          <option value="44100">44.1 kHz</option>
+          <option value="48000" selected>48 kHz</option>
+        </select>
+      </label>
+      <label class="controlsBlock" style="display: inline-block;" title="Add distortion to the signal.">
+        Distortion
+        <input id="distortion" type="checkbox" checked />
+      </label>
+    </div>
+    <div style="clear: both;">
+      <div class="stickToTop" style="z-index: 9000; margin-bottom: 80vh;">
+        <div style="display:inline-block; margin: 0.3em 1em 0.3em 0; float: left;">
+          <button id="playButton">play</button>
+          <button id="stopButton">stop</button>
+        </div>
+        <div class="stickyWhiteBackground overhangRight"
+             title="Playback volume"
+             style="padding: 0.1em 0.5em 0.1em  0.5em; border-bottom-left-radius: 0.5em; float: right;">
+          <label>
+            Volume
+            <input id="volumeSlider"
+                   type="range"
+                   class="styled-slider slider-progress"
+                   style="vertical-align: middle; width: 10em;"
+                   value="0.3"
+                   min="0"
+                   max="1"
+                   step="0.05">
+          </label>
+        </div>
+        <div style="clear: both;"></div>
+      </div>
+      <div style="margin-top: -80vh;"></div>
+
+      <div id="spectrogramContainer" class="centered blockShadow" style="max-width: 1000px;">
+        <div style="max-width: 1000px; --aspect-ratio: 1000/256;">
+          <canvas id="spectrum" style="width: 100%; height: 100%;" width="1000" height="256"></canvas>
+          <div class="graphLabel" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%);">Spectrum</div>
+          <div class="graphLabel" style="position: absolute; bottom: 0; left: 0;">DC</div>
+          <div id="spectrumMidFrequency" class="graphLabel" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">&frac12; Nyquist</div>
+          <div id="spectrumMaxFrequency" class="graphLabel" style="position: absolute; bottom: 0; right: 0;">Nyquist</div>
+        </div>
+        <div class="widgetSeparator"></div>
+        <div style="max-width: 1000px; --aspect-ratio: 1000/500;">
+          <canvas id="spectrogram" style="width: 100%; height: 100%;" width="1000" height="500"></canvas>
+          <div id="spectrogramMaxFrequency" class="graphLabel" style="position: absolute; top: 0; left: 0;">Nyquist</div>
+          <div class="graphLabel" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%);">Spectrogram</div>
+          <div id="spectrogramMidFrequency" class="graphLabel" style="position: absolute; bottom: 50%; left: 0; transform: translateY(50%);">&frac12; Nyquist</div>
+          <div class="graphLabel" style="position: absolute; bottom: 0; left: 0;">DC</div>
+        </div>
+      </div>
+      <div style="height: 0.5em; margin-bottom: -75vh;"></div>
+      <div class="stickToBottom stickyWhiteBackground overhangLeft overhangRight" style="margin-top: 75vh;">
+        <label class="hideOverflow" for="frequencySlider" style="white-space: nowrap;">
+          Frequency:
+          <span id="frequencyDisplay">press play and drag the slider</span>
+        </label>
+        <input id="frequencySlider"
+               type="range"
+               class="styled-slider"
+               value="24"
+               min="0"
+               max="95"
+               style="width: 100%;">
+      </div>
+    </div>
+    <p>
+      TODO: describe what is aliasing and how oversampling helps to reduce it
+    </p>
+    <div id="oversamplingColorScheme" class="controlsBlock" style="display: inline-block; float: right;">
+      Color scheme:
+      <label title="Color coded"><input class="color icon" type="radio" name="oversamplingColorScheme" checked /><span></span></label>
+      <label title="White on black"><input class="white icon" type="radio" name="oversamplingColorScheme" /><span></span></label>
+      <label title="Black on white"><input class="black icon" type="radio" name="oversamplingColorScheme" /><span></span></label>
+    </div>
+    <div style="display: inline-block;">
+      <label class="controlsBlock" style="display: inline-block;">
+        Sample rate
+        <select id="oversamplingSampleRate">
+          <option value="8000">8000 Hz</option>
+          <option value="11025">11025 Hz</option>
+          <option value="16000">16000 Hz</option>
+          <option value="22050">22050 Hz</option>
+          <option value="24000">24 kHz</option>
+          <option value="32000">32 kHz</option>
+          <option value="44100">44.1 kHz</option>
+          <option value="48000" selected>48 kHz</option>
+        </select>
+      </label>
+      <label class="controlsBlock" style="display: inline-block;" title="Add distortion to the signal.">
+        Distortion
+        <input id="oversamplingDistortion" type="checkbox" checked />
+      </label>
+      <div class="controlsBlock" style="display: inline-block;">
+        Oversampling
+        <label title="Do not use oversampling."><input type="radio" id="noOversample" name="oversample" checked />none</label>
+        <label title="Oversample twice the initial sample rate."><input type="radio" id="2xOversample" name="oversample" />2&#215;</label>
+        <label title="Oversample four times the initial sample rate."><input type="radio" id="4xOversample" name="oversample" />4&#215;</label>
+      </div>
+    </div>
+    <div style="clear: both;">
+      <div>
+        <div class="stickToTop" style="z-index: 9000; margin-bottom: 80vh;">
+          <div style="display:inline-block; margin: 0.3em 1em 0.3em 0; float: left;">
+            <button id="oversamplingPlayButton">play</button>
+          </div>
+          <div class="stickyWhiteBackground overhangRight"
+               title="Playback volume"
+               style="padding: 0.1em 0.5em 0.1em 0.5em; border-bottom-left-radius: 0.5em; float: right;">
+            <label>
+              Volume
+              <input id="oversamplingVolumeSlider"
+                     type="range"
+                     class="styled-slider slider-progress"
+                     style="vertical-align: middle; width: 10em;"
+                     value="0.3"
+                     min="0"
+                     max="1"
+                     step="0.05">
+            </label>
+          </div>
+          <div style="clear: both;"></div>
+        </div>
+        <div style="margin-top: -80vh;"></div>
+
+        <div id="oversamplingContainer" class="centered blockShadow" style="max-width: 1000px;">
+          <div style="max-width: 1000px; --aspect-ratio: 1000/400;">
+            <canvas id="oversamplingSpectrogram" style="width: 100%; height: 100%;" width="1000" height="400"></canvas>
+            <div id="oversamplingSpectrogramMaxFrequency" class="graphLabel" style="position: absolute; top: 0; left: 0;">Nyquist</div>
+            <div class="graphLabel" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); text-align: center;">
+              Resulting signal spectrogram
+            </div>
+            <div id="oversamplingSpectrogramRenderingLabel" class="graphLabel note hidden" style="position: absolute; top: 0; right: 0;">rendering...</div>
+            <div id="oversamplingSpectrogramMidFrequency" class="graphLabel" style="position: absolute; bottom: 50%; left: 0; transform: translateY(50%);">&frac12; Nyquist</div>
+            <div class="graphLabel" style="position: absolute; bottom: 0; left: 0;">DC</div>
+          </div>
+          <div class="widgetSeparator"></div>
+          <div style="max-width: 1000px; --aspect-ratio: 1000/500;">
+            <canvas id="oversampledSpectrogram" style="width: 100%; height: 100%;" width="1000" height="500"></canvas>
+            <div id="oversampledSpectrogramMaxFrequency" class="graphLabel" style="position: absolute; top: 0; left: 0;">Nyquist</div>
+            <div class="graphLabel" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); text-align: center;">
+              Oversampled signal spectrogram
+            </div>
+            <div id="oversampledSpectrogramRenderingLabel" class="graphLabel note hidden" style="position: absolute; top: 0; right: 0;">rendering...</div>
+            <div id="oversampledSpectrogramMidFrequency" class="graphLabel" style="position: absolute; bottom: 50%; left: 0; transform: translateY(50%);">&frac12; Nyquist</div>
+            <div class="graphLabel" style="position: absolute; bottom: 0; left: 0;">DC</div>
+          </div>
+          <div class="widgetSeparator"></div>
+          <div style="max-width: 1000px; --aspect-ratio: 1000/150;">
+            <canvas id="oversamplingFilterDisplay" style="width: 100%; height: 100%;" width="1000" height="150"></canvas>
+            <div class="graphLabel" style="position: absolute; top: 7%; left: 0;">0 dB</div>
+            <div class="graphLabel" style="position: absolute; bottom: 0; left: 0;">
+              DC<br />
+              -90 dB
+            </div>
+            <div id="oversamplingFilterDisplayMidFrequency" class="graphLabel" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">&frac12; Nyquist</div>
+            <div id="oversamplingFilterDisplayMaxFrequency" class="graphLabel" style="position: absolute; bottom: 0; right: 0;">Nyquist</div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 0.5em; margin-bottom: -85vh;"></div>
+      <div class="stickyWhiteBackground overhangLeft overhangRight" style="position:sticky; bottom: 0; margin-top: 85vh;">
+        <label class="hideOverflow" for="oversamplingFrequencySlider" style="white-space: nowrap;">
+          Cutoff frequency for filtering the oversampled signal
+        </label>
+        <input id="oversamplingFrequencySlider"
+               type="range"
+               class="styled-slider"
+               step="0.005"
+               min="0.005"
+               max="0.5"
+               value="0.5"
+               style="width: 100%;">
+      </div>
+    </div>
+    <p>
+      TODO: describe what to do or to look for in practice
+    </p>
+    <p>
+      If you are just starting to explore digital signal processing, I hope this explainer was useful for you and
+      you developed better intuition about about conversion between analog and digital signal, sample rate, and aliasing.
+    </p>
+    <p>
+      If you already have experience with DSP, I hope you had fun playing with all the toys on this page.
+    </p>
+    <div style="text-align: center;">
+      See you some other time!<br />
+      Pavel
+      <br />
+      <a href="https://twitter.com/cpp_ape" class="twitterIcon"></a>
+    </div>
+  </div>
+  <div class="credits" style="padding-top: 0.5em;">
+    <div class="content centered" style="text-align: center;">
+      <p>
+        Share
+      </p>
+      <p>
+        <a class="no-external-link-icon" href="https://github.com/mborgerding/kissfft" target="_blank" title="KISS FFT on GitHub">KISS FFT</a> &#xFF5C;
+        <a class="no-external-link-icon" href="https://icons8.com/icon/43738/external-link" target="_blank">External Link icon by Icons8</a><br />
+        <span class="note">These links will open in new tabs.</span>
+      </p>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="range-input.js"></script>
+  <script type="text/javascript" src="sample-rate.js"></script>
+  <script type="text/javascript" src="fft.js"></script>
+</body>
+</html>
