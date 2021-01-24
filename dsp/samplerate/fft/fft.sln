@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fft", "fft.vcxproj", "{EE135413-5265-4005-87F4-BC2BC01EF844}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Emscripten = Debug|Emscripten
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Emscripten = Release|Emscripten
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|Emscripten.ActiveCfg = Debug|Emscripten
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|Emscripten.Build.0 = Debug|Emscripten
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|x64.ActiveCfg = Debug|x64
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|x64.Build.0 = Debug|x64
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|x86.ActiveCfg = Debug|Win32
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Debug|x86.Build.0 = Debug|Win32
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|Emscripten.ActiveCfg = Release|Emscripten
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|Emscripten.Build.0 = Release|Emscripten
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|x64.ActiveCfg = Release|x64
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|x64.Build.0 = Release|x64
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|x86.ActiveCfg = Release|Win32
+		{EE135413-5265-4005-87F4-BC2BC01EF844}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C557BDF-FBB5-4697-82DC-77BEAF49D411}
+	EndGlobalSection
+EndGlobal
