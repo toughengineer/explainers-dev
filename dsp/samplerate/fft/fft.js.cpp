@@ -231,11 +231,11 @@ Float chebyshevPolynomialsDistortion(Float value, const std::vector<Float> &harm
 }
 
 struct LowPassBiQuadFilter {
-  explicit LowPassBiQuadFilter(Float normalizedFrequency) {
-    const Float w0 = 2 * pi * normalizedFrequency;
+  explicit LowPassBiQuadFilter(Float normalizedFrequency, Float Q) {
+    const Float w0 = 2._float * pi * normalizedFrequency;
     const Float cosw0 = std::cos(w0);
     const Float sinw0 = std::sin(w0);
-    const Float alpha = sinw0 / 1.4142135623730951_float;  // sinw0/(2*Q)
+    const Float alpha = sinw0 / (2._float * Q);
     const Float invA0 = 1 / (1 + alpha);  // norm to a0 == 1
     a1 = -2 * cosw0 * invA0;
     a2 = (1 - alpha) * invA0;
@@ -244,16 +244,17 @@ struct LowPassBiQuadFilter {
     b2 = (1 - cosw0) / 2 * invA0;
   }
   Float operator()(Float x) {
-    const auto y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
-    x2 = std::exchange(x1, x);
-    y2 = std::exchange(y1, y);
+    //Transposed Direct Form 2
+    const auto y = b0 * x + s1;
+    s1 = s2 + b1 * x - a1 * y;
+    s2 = b2 * x - a2 * y;
     return y;
   }
 
 private:
   Float
     a1, a2, b0, b1, b2,
-    x2 = 0._float, x1 = 0._float, y2 = 0._float, y1 = 0._float;
+    s1 = 0._float, s2 = 0._float;
 };
 
 struct Oversampling {
@@ -428,8 +429,8 @@ struct Oversampling {
       initWindow(oversampledWindow);
     }
 
-    filter = LowPassBiQuadFilter(cutoffFrequency * oversampledTimeStep);
-    filter2 = LowPassBiQuadFilter(cutoffFrequency * oversampledTimeStep);
+    filter = LowPassBiQuadFilter(cutoffFrequency * oversampledTimeStep, Q1);
+    filter2 = LowPassBiQuadFilter(cutoffFrequency * oversampledTimeStep, Q2);
 
     audioBuffer.clear();
     audioBufferSampleCount = chunkSize * numberOfChunks;
@@ -534,6 +535,8 @@ private:
   static constexpr auto lengthInSeconds = 2;
   static constexpr auto numberOfChunks = 1000;
   static constexpr auto defaultSampleRate = 48000;
+  static constexpr auto Q1 = 0.54119610_float;
+  static constexpr auto Q2 = 1.3065630_float;
 
   std::vector<Float>
     fftInput,
@@ -549,8 +552,8 @@ private:
     oversampledFrequencyData;
   std::vector<float> audioBuffer;
   std::optional<KissFftReal> fft;
-  LowPassBiQuadFilter filter{ defaultSampleRate / 2._float };
-  LowPassBiQuadFilter filter2{ defaultSampleRate / 2._float };
+  LowPassBiQuadFilter filter{ defaultSampleRate / 2._float, Q1 };
+  LowPassBiQuadFilter filter2{ defaultSampleRate / 2._float, Q2 };
   Float
     cutoffFrequency = defaultSampleRate / 2._float,
     startFrequency = 55._float,

@@ -27,11 +27,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\kissfft\kiss_fft.c">
+    <ClCompile Include="..\..\..\..\kissfft\kiss_fft.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Emscripten'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">CompileAsCpp</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\..\kissfft\tools\kiss_fftr.c">
+    <ClCompile Include="..\..\..\..\kissfft\tools\kiss_fftr.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Emscripten'">CompileAsCpp</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">CompileAsCpp</CompileAs>
     </ClCompile>
@@ -72,12 +72,12 @@
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Emscripten'">
     <ConfigurationType>JSApplication</ConfigurationType>
     <PlatformToolset>emcc</PlatformToolset>
-    <EmscriptenDir>$(SolutionDir)..\..\emsdk\upstream\emscripten\</EmscriptenDir>
+    <EmscriptenDir>$(SoluionDir)..\..\..\..\emsdk\upstream\emscripten\</EmscriptenDir>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">
     <ConfigurationType>JSApplication</ConfigurationType>
     <PlatformToolset>emcc</PlatformToolset>
-    <EmscriptenDir>$(SolutionDir)..\..\emsdk\upstream\emscripten\</EmscriptenDir>
+    <EmscriptenDir>$(SoluionDir)..\..\..\..\emsdk\upstream\emscripten\</EmscriptenDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -106,7 +106,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Emscripten'">
     <ClCompile>
       <OptimizationLevel>O3</OptimizationLevel>
-      <AdditionalIncludeDirectories>$(SoluionDir)..\..\kissfft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SoluionDir)..\..\..\..\kissfft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>kiss_fft_scalar=double</PreprocessorDefinitions>
       <AdditionalOptions>-std=c++17 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -122,7 +122,7 @@
       <EmBind>true</EmBind>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SoluionDir)..\..\kissfft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SoluionDir)..\..\..\..\kissfft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>kiss_fft_scalar=double</PreprocessorDefinitions>
       <AdditionalOptions>-std=c++17 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

@@ -1136,30 +1136,35 @@ function scheduleVolumeChange(gainNode, newValue, duration, start = 0) {
     const w0 = 2 * Math.PI * f0;
     const cosw0 = Math.cos(w0);
     const sinw0 = Math.sin(w0);
-    const alpha = sinw0 / 1.4142135623730951;  // sinw0/(2*Q)
-    const invA0 = 1 / (1 + alpha);  // norm to a0 == 1
-    const a1 = -2 * cosw0 * invA0;
-    const a2 = (1 - alpha) * invA0;
-    const b0 = (1 - cosw0) / 2 * invA0;
-    const b1 = (1 - cosw0) * invA0;
-    const b2 = (1 - cosw0) / 2 * invA0;
+    function getGain(Q) {
+      const alpha = sinw0 / (2 * Q);
+      const invA0 = 1 / (1 + alpha);  // norm to a0 == 1
+      const a1 = -2 * cosw0 * invA0;
+      const a2 = (1 - alpha) * invA0;
+      const b0 = (1 - cosw0) / 2 * invA0;
+      const b1 = (1 - cosw0) * invA0;
+      const b2 = (1 - cosw0) / 2 * invA0;
 
-    const sqr = x => x * x;
+      const sqr = x => x * x;
 
-    // numerator = 16*b0*b2*phi^2 - 4*(b0*b1 + 4*b0*b2 + b1*b2)*phi + (b0 + b1 + b2)^2
-    // denominator = 16*a2*phi^2 - 4*(a1 + 4*a2 + a1*a2)*phi + (a1 + a2)^2
-    // f(phi)=(numerator/denimunator)^0.5
-    const c2 = 16 * b0 * b2;
-    const c1 = -4 * (b0 * b1 + 4 * b0 * b2 + b1 * b2);
-    const c0 = sqr(b0 + b1 + b2);
-    const d2 = 16 * a2;
-    const d1 = -4 * (a1 + 4 * a2 + a1 * a2);
-    const d0 = sqr(1 + a1 + a2);
-
-    function f(w) {
-      const phi = sqr(Math.sin(Math.PI * w * 0.5));
-      return 10 * (Math.log10((c2 * phi + c1) * phi + c0) - Math.log10((d2 * phi + d1) * phi + d0));
+      // numerator = 16*b0*b2*phi^2 - 4*(b0*b1 + 4*b0*b2 + b1*b2)*phi + (b0 + b1 + b2)^2
+      // denominator = 16*a2*phi^2 - 4*(a1 + 4*a2 + a1*a2)*phi + (a1 + a2)^2
+      // f(phi)=(numerator/denimunator)^0.5
+      const c2 = 16 * b0 * b2;
+      const c1 = -4 * (b0 * b1 + 4 * b0 * b2 + b1 * b2);
+      const c0 = sqr(b0 + b1 + b2);
+      const d2 = 16 * a2;
+      const d1 = -4 * (a1 + 4 * a2 + a1 * a2);
+      const d0 = sqr(1 + a1 + a2);
+      return function (w) {
+        const phi = sqr(Math.sin(Math.PI * w * 0.5));
+        return 10 * (Math.log10((c2 * phi + c1) * phi + c0) - Math.log10((d2 * phi + d1) * phi + d0));
+      };
     }
+
+    const f1 = getGain(0.54119610);
+    const f2 = getGain(1.3065630);
+    const f = w => f1(w) + f2(w);
 
     const dBMin = -90;
     const dBMax = 0;
@@ -1178,7 +1183,7 @@ function scheduleVolumeChange(gainNode, newValue, duration, start = 0) {
     const pointCount = 300;
     const pixelsPerPoint = filterDisplayCtx.canvas.width / (pointCount - 1);
     for (let i = 0; i != pointCount; ++i) {
-      const dB = 2 * f(i / pointCount);
+      const dB = f(i / pointCount);
       filterDisplayCtx.lineTo(i * pixelsPerPoint, Math.max(dBMap(dB) * filterDisplayCtx.canvas.height, -1));
     }
     filterDisplayCtx.lineTo(filterDisplayCtx.canvas.width, -1);
@@ -1192,7 +1197,7 @@ function scheduleVolumeChange(gainNode, newValue, duration, start = 0) {
     filterDisplayCtx.beginPath();
     const x0 = Math.round(2 * f0 * filterDisplayCtx.canvas.width) + 0.5;
     filterDisplayCtx.moveTo(x0, 0);
-    filterDisplayCtx.lineTo(x0, dBMap(-6) * filterDisplayCtx.canvas.height);
+    filterDisplayCtx.lineTo(x0, dBMap(-3) * filterDisplayCtx.canvas.height);
     filterDisplayCtx.stroke();
     filterDisplayCtx.restore();
   };
