@@ -1,0 +1,5 @@
+﻿  kiss_fft.c
+  kiss_fftr.c
+  fft.js.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1341,5): warning MSB8012: TargetPath(D:\dev\explainers-dev\dsp\samplerate\fft\Emscripten\Release\fft.js) does not match the Linker's OutputFile property value (D:\dev\explainers-dev\dsp\samplerate\fft.js). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+  fft.vcxproj -> D:\dev\explainers-dev\dsp\samplerate\fft\Emscripten\Release\fft.js
