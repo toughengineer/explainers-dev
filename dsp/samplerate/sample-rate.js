@@ -11,7 +11,8 @@ const graphStyle = {
   },
   yAxis: {
     grid: {
-      color: '#ddd'
+      color: 'black',
+      opacity: 0.133
     }
   },
   mark: {
@@ -189,6 +190,7 @@ function getThrottledCallback(callback, period, delay = 0) {
     const radius = graphStyle.mark.radius;
     ctx.strokeStyle = graphStyle.yAxis.grid.color;
     ctx.lineWidth = 1;
+    ctx.globalAlpha = graphStyle.yAxis.grid.opacity;
     ctx.beginPath();
     for (let p of points) {
       if (Math.abs(p[1]) > radius) {
@@ -198,6 +200,7 @@ function getThrottledCallback(callback, period, delay = 0) {
       }
     }
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     ctx.strokeStyle = graphStyle.mark.line.color;
     ctx.lineWidth = graphStyle.mark.line.width;
@@ -263,8 +266,6 @@ function fillCanvas(ctx, color = 'black') {
     ctx.stroke();
 
     ctx.strokeStyle = graphStyle.line.color;
-    ctx.lineWidth = 7;
-
     const halfWidth = ctx.canvas.width / 2;
     const yScale = ctx.canvas.height * 6 / 8;
 
@@ -273,6 +274,11 @@ function fillCanvas(ctx, color = 'black') {
     ctx.lineTo(halfWidth, 0);
     ctx.lineTo(halfWidth, yScale);
     ctx.lineTo(ctx.canvas.width - 1, yScale);
+    ctx.lineWidth = graphStyle.line.width * 3;
+    ctx.globalAlpha = 0.3;
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 1;
     ctx.stroke();
 
     ctx.strokeStyle = '#333';
@@ -514,6 +520,7 @@ function blackmanWindow(x) {
 
       const radius = graphStyle.mark.radius;
       ctx.strokeStyle = graphStyle.yAxis.grid.color;
+      ctx.globalAlpha = graphStyle.yAxis.grid.opacity;
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (let i = numberOfSamplesBefore + 1; i != samples.length; ++i) {
@@ -527,6 +534,7 @@ function blackmanWindow(x) {
         }
       }
       ctx.stroke();
+      ctx.globalAlpha = 1;
 
       ctx.strokeStyle = graphStyle.mark.line.color;
       ctx.lineWidth = graphStyle.mark.line.width;
@@ -847,10 +855,10 @@ for (let i = 0; i != distortionCurve.length; ++i) {
   distortionCurve[i] /= norm;
 }
 
-function scheduleVolumeChange(gainNode, newValue, duration, start = 0) {
+function scheduleVolumeChange(gainNode, newValue, duration) {
   gainNode.gain.cancelScheduledValues(gainNode.context.currentTime);
   const oldValue = gainNode.gain.value;
-  start += gainNode.context.currentTime;
+  const start = gainNode.context.currentTime;
   gainNode.gain.linearRampToValueAtTime(oldValue * 0.99 + newValue * 0.01, start + 0.1 * duration);
   gainNode.gain.linearRampToValueAtTime(oldValue * 0.95 + newValue * 0.05, start + 0.2 * duration);
   gainNode.gain.linearRampToValueAtTime(oldValue * 0.85 + newValue * 0.15, start + 0.3 * duration);
@@ -1296,47 +1304,53 @@ harmonics coefficients: ${oversampling.harmonicsCoefficients}`);
     const getVolume = () => Number.parseFloat(volumeSlider.value);
 
     let audioCtx = null;
-    let audioBuffer = null;
-    let gain;
+    let audioBuffer;
+    let gain = null;
 
     function createAudioCtx() {
       audioCtx = new AudioContext({ sampleRate: getSampleRate() });
       audioCtx.suspend();
-      gain = audioCtx.createGain();
-      gain.gain.value = getVolume();
-      gain.connect(audioCtx.destination);
 
       audioBuffer = audioCtx.createBuffer(1, oversampling.audioBufferSampleCount, audioCtx.sampleRate);
+
+      volumeSlider.addEventListener('input', getThrottledCallback(() => {
+        scheduleVolumeChange(gain, getVolume(), 0.05);
+      }, 50));
     }
 
-    volumeSlider.addEventListener('input', getThrottledCallback(() => {
-      scheduleVolumeChange(gain, getVolume(), 0.05);
-    }, 50));
 
     playButton.addEventListener('click', () => {
-      if (audioCtx === null)
+      if (audioCtx === null) {
         createAudioCtx();
-
-      if (audioCtx.state != 'suspended')
+      }
+      else if (audioCtx.state != 'suspended') {
         return;
+      }
 
       if (bufferIsDirty) {
         audioBuffer.copyToChannel(oversampling.audioBufferData, 0);
         bufferIsDirty = false;
       }
 
-      gain.gain.cancelScheduledValues(audioCtx.currentTime);
-      gain.gain.value = getVolume();
+      if (gain)
+        gain.disconnect();
+      gain = audioCtx.createGain();
+      gain.connect(audioCtx.destination);
 
       const audioBufferNode = audioCtx.createBufferSource();
       audioBufferNode.buffer = audioBuffer;
       audioBufferNode.connect(gain);
       audioBufferNode.start();
+
+      gain.gain.value = getVolume();
+
       audioCtx.resume().then(() => {
-        scheduleVolumeChange(gain, 0, 0.05, 1.950);
         setTimeout(() => {
-          audioCtx.suspend();
-        }, 2050);
+          scheduleVolumeChange(gain, 0, 0.05);
+          setTimeout(() => {
+            audioCtx.suspend();
+          }, 100);
+        }, 1950);
       });
     });
 

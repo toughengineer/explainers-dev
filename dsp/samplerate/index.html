@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8" />
   <title>Sample rate and aliasing</title>
   <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=2,shrink-to-fit=no">
   <link rel="stylesheet" href="range-input.css">
@@ -27,6 +28,7 @@
     body {
       font-family: Helvetica, Arial, Sans-Serif;
       font-size: 20px;
+      line-height: 1.5em;
       color: #010101;
       height: auto;
       margin: 0;
@@ -227,10 +229,49 @@
       .twitterIcon:hover {
         opacity: 1;
       }
+
+    /*webkit*/
+    input[type=range].styled-slider.frequency::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #dfffdf 20%,#efefef 22%, #ffdfdf 24%);
+    }
+
+    input[type=range].styled-slider.frequency:hover::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #cbfecb 20%, #e5e5e5 22%, #fecbcb 24%);
+    }
+
+    input[type=range].styled-slider.frequency:active::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #ebffeb 20%, #f5f5f5 22%, #ffebeb 24%);
+    }
+
+    /*mozilla*/
+    input[type=range].styled-slider.frequency::-moz-range-track {
+      background: linear-gradient(to right, #dfffdf 20%,#EFEFEF 22%, #ffdfdf 24%);
+    }
+
+    input[type=range].styled-slider.frequency:hover::-moz-range-track {
+      background: linear-gradient(to right, #cbfecb 20%, #E5E5E5 22%, #fecbcb 24%);
+    }
+
+    input[type=range].styled-slider.frequency:active::-moz-range-track {
+      background: linear-gradient(to right, #ebffeb 20%, #F5F5F5 22%, #ffebeb 24%);
+    }
+
+    /*ms*/
+    input[type=range].styled-slider.frequency::-ms-track {
+      background: linear-gradient(to right, #dfffdf 20%,#EFEFEF 22%, #ffdfdf 24%);
+    }
+
+    input[type=range].styled-slider.frequency:hover::-ms-track {
+      background: linear-gradient(to right, #cbfecb 20%, #E5E5E5 22%, #fecbcb 24%);
+    }
+
+    input[type=range].styled-slider.frequency:active::-ms-track {
+      background: linear-gradient(to right, #ebffeb 20%, #F5F5F5 22%, #ffebeb 24%);
+    }
   </style>
 </head>
 <body>
-  <div style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; min-height: 100vh; z-index: -1;">
+  <div style="position:absolute; top: 0; left: 0; right: 0; height: 100%; min-height: 100vh; z-index: -1;">
     <div class="content contentBackground centered"></div>
   </div>
   <div class="content centered">
@@ -242,10 +283,45 @@
       Hello, friend!
     </p>
     <p>
-      This time I want to tell you about sampling rate (or, simply, <em>sample rate</em>) in digital signal processing, and about a perculiar effect called <em>aliasing</em>.
+      This time I want to tell you about sampling rate (or, simply, <em>sample rate</em>) in digital signal processing,
+      and about a perculiar effect called <em>aliasing</em>.
+    </p>
+    <h2 id="samplerate">Sample rate</h2>
+    <p>
+      In <em>digital</em> signal processing we work with signals represented as discrete <em>numbers</em>,
+      as opposed to signals encoded as continuously changing electrical voltage or
+      using some other physical phenomena such as air pressure waves or electromagnetic waves.
     </p>
     <p>
-      TODO: describe how sampling works
+      To convert continuous, so called <em>analog</em> signal into <em>descrete</em> digital signal,
+      a person somewhat familiar with tech or math would intuitively have an idea to measure the analog signal
+      from time to time and write down measured values.<br />
+      In fact this is, in general, <em>exactly</em> what we do!
+    </p>
+    <p>
+      In this context, measuring a signal, i.e. taking a <em>sample</em> of a signal, is called <em>sampling</em>.<br />
+    </p>
+    <p>
+      In general sampling can be performed at some random, irregular intervals.
+      However sampling at steady, equal intervals makes digital processing of such signal much easier.<br />
+      When the signal is sampled at equal intervals, we can talk about <em>sampling rate</em>, or, simply, sample rate,
+      i.e. the rate at which measurements of the signal occur.
+      <span class="note">This time we will examine this exact case of sampling at equal intervals.</span><br />
+      Usually sample rate is measured in Hertz&nbsp;&mdash; <em>samples per second</em>.
+    </p>
+    <p>
+      Here you can see how continuous signal
+      (<span style="display: inline-block; vertical-align: middle; width:1em; height: 4px; background: #0882ff;">
+      </span>&nbsp;blue&nbsp;line) is sampled at equal intervals,
+      which results in samples
+      (<span style="display: inline-block;
+                   vertical-align: middle;
+                   width: 8px;
+                   height: 8px;
+                   border: 3px solid #f20a0a;
+                   border-radius: 8px;
+                   background: #ffa631d9;">
+      </span>&nbsp;red&nbsp;circles) ending up at different positions along the vertical axis.
     </p>
     <div>
       <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
@@ -258,10 +334,40 @@
       </div>
     </div>
     <p>
-      Once given the samples, what to use to connect the points? A step? Straight line? A Pokemon shape?
+      Sampled <em>digital signal</em> may result from digitizing analog signal, or
+      from signal generation, which ranges from computing a bunch of sine values to pretty complex simulations.
     </p>
     <p>
-      TODO: describe how a step can be represented by infinite number of sines
+      Anyway, conversion from analog signal, or generating digital signal directly, gives us a sequence of samples.<br />
+      Your goal may be to use it to analyze the signal with many powerful methods developed in the domain of
+      <em>DSP</em> <note>(i.e. <strong>d</strong>igital&nbsp;<strong>s</strong>ignal&nbsp;<strong>p</strong>rocessing)</note>,
+      and in this case we are done here. <span class="note">But you will still benefit from reading on.</span>
+    </p>
+    <p>
+      Otherwise, often we would like to turn samples back into analog signal.<br />
+      But given the samples, what should we use to connect the points to make the signal continuous?
+      A&nbsp;step? Straight line?<br />
+      A Pokemon shape?
+    </p>
+    <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
+      <img src="signal-reconstruction.png" style="width: 100%; height: 100%;" />
+    </div>
+    <p>
+      Of course, very smart people alread figured it out: we can <em>perfectly&nbsp;reconstruct</em> sampled signal
+      if it is <em>band&nbsp;limited</em> and we use sufficient sample rate
+      <span class="note">(i.e. if we sample often enough)</span>.<br />
+      The theory behind this is called
+      <span style="display: block; margin: 0.7em 0; text-align: center;">
+        <a href="https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem"
+           target="_blank"
+           title="Whittaker–Nyquist–Kotelnikov–Shannon sampling theorem on Wikipedia"
+           style="white-space: normal;"><em>Whittaker–Nyquist–Kotelnikov–Shannon sampling theorem</em></a>
+      </span>
+      &mdash; that's how many people discovered and rediscovered this very useful and important phenomenon.<br />
+      Let's try to wrap our head around it step by step.
+    </p>
+    <p>
+      I think looking at how <em>a&nbsp;step</em> can be represented with a sum of sines will help us a lot.
     </p>
     <div>
       <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
@@ -284,7 +390,17 @@
       </div>
     </div>
     <p>
+      In mathematics any function can be represented as a sum of infinite number of sines and cosines,
+      such a representation is called <em>Fourier series</em>.
+    </p>
+    <p>
       For 10000 components it gets really close...
+    </p>
+    <div class="centered blockShadow" style="max-width: 1000px; --aspect-ratio: 1000/500;">
+      <img src="10000sines.png" style="width: 100%; height: 100%;" />
+    </div>
+    <p>
+      In this particular case we will indeed need infinite number of components, because a step has <em>discontinuity</em>
     </p>
     <p>
       TODO: describe how band limited signal can be perfectly reconstructed from samples using lowpass filter
@@ -307,8 +423,21 @@
       </div>
       <div style="height: 0.5em; margin-bottom: -75vh;"></div>
       <div class="stickToBottom stickyWhiteBackground overhangLeft overhangRight" style="margin-top: 75vh;">
-        <input id="waveFrequency" type="range" class="styled-slider" style="width: 100%;" min="1" max="40" value="1" step="0.1" />
-        <div class="note" style="text-align:center;">Move the slider to change frequency of the wave.</div>
+        <div style="width: 100%; display: flex; flex-direction: row;">
+          <div style="width: 1em;"></div>
+          <div style="flex-grow: 0.8; position: relative;">
+            <div style="text-align: center;">OK</div>
+            <div style="width: 100%; height: 0.5em; border: 1px solid black; border-bottom-width: 0; border-radius: 0.5em 0.5em 0 0;"></div>
+          </div>
+          <div style="flex-grow: 0.1;"></div>
+          <div style="flex-grow: 3.1;">
+            <div style="text-align: center;">all kinds of mess</div>
+            <div style="width: 100%; height: 0.5em; border: 1px solid black; border-bottom-width: 0; border-radius: 0.5em 0.5em 0 0;"></div>
+          </div>
+          <div style="width: 1em;"></div>
+        </div>
+        <input id="waveFrequency" type="range" class="styled-slider frequency" style="width: 100%;" min="1" max="40" value="1" step="0.1" />
+        <div class="note" style="text-align: center;">Move the slider to change frequency of the wave.</div>
       </div>
     </div>
     <p>
