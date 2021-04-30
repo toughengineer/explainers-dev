@@ -296,7 +296,7 @@
       To convert continuous, so called <em>analog</em> signal into <em>descrete</em> digital signal,
       a person somewhat familiar with tech or math would intuitively have an idea to measure the analog signal
       from time to time and write down measured values.<br />
-      In fact this is, in general, <em>exactly</em> what we do!
+      In fact, this is, in general, <em>exactly</em> what we do!
     </p>
     <p>
       In this context, measuring a signal, i.e. taking a <em>sample</em> of a signal, is called <em>sampling</em>.<br />
@@ -312,7 +312,7 @@
     <p>
       Here you can see how continuous signal
       (<span style="display: inline-block; vertical-align: middle; width:1em; height: 4px; background: #0882ff;">
-      </span>&nbsp;blue&nbsp;line) is sampled at equal intervals,
+      </span>&nbsp;blue&nbsp;line) evolving along horizontal axis is sampled at equal intervals,
       which results in samples
       (<span style="display: inline-block;
                    vertical-align: middle;
@@ -345,7 +345,7 @@
     </p>
     <p>
       Otherwise, often we would like to turn samples back into analog signal.<br />
-      But given the samples, what should we use to connect the points to make the signal continuous?
+      But, given the samples, what should we use to connect the points to make the signal continuous?
       A&nbsp;step? Straight line?<br />
       A Pokemon shape?
     </p>
@@ -353,7 +353,7 @@
       <img src="signal-reconstruction.png" style="width: 100%; height: 100%;" />
     </div>
     <p>
-      Of course, very smart people alread figured it out: we can <em>perfectly&nbsp;reconstruct</em> sampled signal
+      Of course, very smart people already figured it out: we can <em>perfectly&nbsp;reconstruct</em> sampled signal
       if it is <em>band&nbsp;limited</em> and we use sufficient sample rate
       <span class="note">(i.e. if we sample often enough)</span>.<br />
       The theory behind this is called
@@ -392,6 +392,7 @@
     <p>
       In mathematics any function can be represented as a sum of infinite number of sines and cosines,
       such a representation is called <em>Fourier series</em>.
+      Above you can see how each additional component (or term) makes the sum closer and closer to the desired function.
     </p>
     <p>
       For 10000 components it gets really close...
@@ -400,7 +401,24 @@
       <img src="10000sines.png" style="width: 100%; height: 100%;" />
     </div>
     <p>
-      In this particular case we will indeed need infinite number of components, because a step has <em>discontinuity</em>
+      In this particular case we will indeed need infinite number of components, because a step has <em>discontinuity</em>,
+      i.e. the function value changes instantaneously at the point where it makes a step.
+      You can think about it in two ways:<br />
+      we need <em>infinitely many</em> sines which gradually add smaller and smaller corrections, eventually adding corrections of
+      infinitely small sizes, all to represent the discontinuity accurately, or<br />
+      we need infinite number of sines eventually with sines of <em>infinite frequency</em> to reflect the fact that the signal
+      changes with <em>infinitely fast rate</em>.
+    </p>
+    <p>
+      Of course, in practice infinity and infinite number of something is impossible
+      <span class="note">(except the infinite universe, which does not help much though)</span>.
+      Even if the step function is impossible in reality <span class="note">(because of the <em>infinitely</em> fast change)</span>,
+      we still can benefit from this analysis.
+    </p>
+    <p>
+      What we can do is take only a bunch of the first sines in the sum representing the function&nbsp;&mdash;
+      this way we effectively <em>low-pass filter</em> the initial signal, i.e. we allow only sines with the lowest frequencies to pass the filter.<br />
+      And now we have band limited signal, i.e. signal consisting only of (sines with) some lowest frequencies.
     </p>
     <p>
       TODO: describe how band limited signal can be perfectly reconstructed from samples using lowpass filter
